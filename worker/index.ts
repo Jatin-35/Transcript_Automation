@@ -21,7 +21,9 @@ async function withRetry<T>(
       return await fn();
     } catch (err) {
       lastErr = err;
-      console.warn(`Attempt ${i + 1} failed:`, err instanceof Error ? err.message : err);
+      const msg = err instanceof Error ? err.message : String(err);
+      const detail = (err as { response?: { data?: unknown; status?: number } })?.response?.data;
+      console.warn(`Attempt ${i + 1} failed: ${msg}`, detail ? JSON.stringify(detail).slice(0, 200) : "");
       if (i < retries - 1) await new Promise((r) => setTimeout(r, delayMs * (i + 1)));
     }
   }
@@ -44,6 +46,9 @@ async function processRecording(recordingId: string) {
     await withRetry(() => downloadFile(rec.driveFileId, tempFile));
 
     // Step 2: Transcribe
+    const fileSize = fs.statSync(tempFile).size;
+    console.log(`Downloaded ${rec.filename}: ${(fileSize / 1024).toFixed(1)} KB`);
+    if (fileSize < 1000) throw new Error(`Downloaded file is too small (${fileSize} bytes) — download may have failed`);
     await prisma.recording.update({ where: { id: recordingId }, data: { status: "TRANSCRIBING" } });
     const result = await withRetry(() => transcribeFile(tempFile), 2, 10000);
 

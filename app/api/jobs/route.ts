@@ -48,7 +48,10 @@ export async function POST(req: NextRequest) {
 
   if (files.length === 0) {
     return NextResponse.json(
-      { error: "No MP3 files found in this Drive folder" },
+      {
+        error:
+          "No audio files found in this Drive folder. Make sure: (1) the folder is shared as 'Anyone with the link', (2) it contains audio files (.mp3, .m4a, .wav, .ogg, .aac, etc.)",
+      },
       { status: 400 }
     );
   }

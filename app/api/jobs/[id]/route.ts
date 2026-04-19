@@ -15,6 +15,23 @@ export async function GET(
   return NextResponse.json(job);
 }
 
+export async function PATCH(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  // Reset all FAILED recordings to PENDING so worker retries them
+  const { count } = await prisma.recording.updateMany({
+    where: { jobId: id, status: "FAILED" },
+    data: { status: "PENDING", errorMessage: null },
+  });
+  await prisma.job.update({
+    where: { id },
+    data: { status: "PROCESSING" },
+  });
+  return NextResponse.json({ retried: count });
+}
+
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

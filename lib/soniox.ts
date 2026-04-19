@@ -28,10 +28,7 @@ export async function transcribeFile(
     filename,
     enable_speaker_diarization: true,
     enable_language_identification: true,
-    language_hints: [
-      "hi", "en", "ta", "te", "kn", "ml", "mr", "gu", "pa", "bn",
-      "or", "ur", "as",
-    ],
+    language_hints: ["hi", "en", "ta", "te", "kn"],
     wait: true,
     wait_options: {
       timeout_ms: 3600000, // 1 hour max wait for long recordings

@@ -37,6 +37,14 @@ export default function JobDetailPage() {
   const [job, setJob] = useState<Job | null>(null);
   const [filter, setFilter] = useState("ALL");
   const [search, setSearch] = useState("");
+  const [retrying, setRetrying] = useState(false);
+
+  const retryFailed = async () => {
+    setRetrying(true);
+    await fetch(`/api/jobs/${id}`, { method: "PATCH" });
+    await fetchJob();
+    setRetrying(false);
+  };
 
   const fetchJob = async () => {
     const res = await fetch(`/api/jobs/${id}`);
@@ -56,8 +64,10 @@ export default function JobDetailPage() {
     </div>
   );
 
+  const completedCount = job.recordings.filter(r => r.status === "COMPLETED").length;
+  const failedCount = job.recordings.filter(r => r.status === "FAILED").length;
   const pct = job.totalFiles > 0
-    ? Math.round((job.processedFiles / job.totalFiles) * 100)
+    ? Math.round((completedCount / job.totalFiles) * 100)
     : 0;
 
   const statuses = ["ALL", "COMPLETED", "FAILED", "TRANSCRIBING", "TRANSLATING", "PENDING"];
@@ -84,22 +94,33 @@ export default function JobDetailPage() {
               {job.status}
             </span>
           </div>
-          {job.status === "COMPLETED" && (
-            <a href={`/api/jobs/${job.id}/download`} style={{
-              padding: "10px 22px", borderRadius: 10, fontSize: 14, fontWeight: 700,
-              background: "linear-gradient(135deg, #10b981, #059669)",
-              color: "white", textDecoration: "none"
-            }}>
-              ⬇ Download All Transcripts
-            </a>
-          )}
+          <div style={{ display: "flex", gap: 10 }}>
+            {failedCount > 0 && (
+              <button onClick={retryFailed} disabled={retrying} style={{
+                padding: "10px 22px", borderRadius: 10, fontSize: 14, fontWeight: 700,
+                background: retrying ? "#e2e8f0" : "linear-gradient(135deg, #f59e0b, #d97706)",
+                color: retrying ? "#94a3b8" : "white", border: "none", cursor: retrying ? "default" : "pointer"
+              }}>
+                {retrying ? "Retrying..." : `↺ Retry ${failedCount} Failed`}
+              </button>
+            )}
+            {job.status === "COMPLETED" && (
+              <a href={`/api/jobs/${job.id}/download`} style={{
+                padding: "10px 22px", borderRadius: 10, fontSize: 14, fontWeight: 700,
+                background: "linear-gradient(135deg, #10b981, #059669)",
+                color: "white", textDecoration: "none"
+              }}>
+                ⬇ Download All Transcripts
+              </a>
+            )}
+          </div>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 20 }}>
           {[
             { label: "Total Files", value: job.totalFiles, color: "#6366f1" },
-            { label: "Completed", value: job.processedFiles, color: "#10b981" },
-            { label: "Failed", value: job.failedFiles, color: "#ef4444" },
+            { label: "Completed", value: completedCount, color: "#10b981" },
+            { label: "Failed", value: failedCount, color: "#ef4444" },
             { label: "Progress", value: `${pct}%`, color: "#8b5cf6" },
           ].map((stat) => (
             <div key={stat.label} style={{
