@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Job {
+  id             String      @id @default(cuid())
+  name           String
+  driveFolderId  String
+  status         JobStatus   @default(PENDING)
+  totalFiles     Int         @default(0)
+  processedFiles Int         @default(0)
+  failedFiles    Int         @default(0)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  recordings     Recording[]
+}
+
+model Recording {
+  id               String          @id @default(cuid())
+  jobId            String
+  filename         String
+  driveFileId      String
+  status           RecordingStatus @default(PENDING)
+  languageDetected String?
+  transcriptText   String?         @db.Text
+  docxPath         String?
+  errorMessage     String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  job              Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+}
+
+enum JobStatus {
+  PENDING
+  DOWNLOADING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum RecordingStatus {
+  PENDING
+  DOWNLOADING
+  TRANSCRIBING
+  TRANSLATING
+  GENERATING_DOCX
+  COMPLETED
+  FAILED
+}
