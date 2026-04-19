@@ -7,16 +7,20 @@
     "build": "npx prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "worker": "npx ts-node --esm worker/index.ts",
+    "worker": "npx ts-node --project tsconfig.worker.json worker/index.ts",
     "worker:prod": "node worker/dist/index.js",
     "db:migrate": "npx prisma migrate deploy",
     "db:generate": "npx prisma generate"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "@prisma/adapter-neon": "^7.7.0",
+    "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "@soniox/node": "^1.1.2",
     "@types/archiver": "^7.0.0",
     "@types/form-data": "^2.2.1",
+    "@types/ws": "^8.18.1",
     "archiver": "^7.0.1",
     "axios": "^1.15.0",
     "class-variance-authority": "^0.7.1",
@@ -28,11 +32,13 @@
     "lucide-react": "^1.8.0",
     "next": "16.2.4",
     "openai": "^6.34.0",
+    "pg": "^8.20.0",
     "prisma": "^7.7.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.5.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "ws": "^8.20.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

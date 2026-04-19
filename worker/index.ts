@@ -1,13 +1,11 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
 import path from "path";
 import fs from "fs";
+import { prisma } from "../lib/prisma";
 import { downloadFile } from "../lib/drive";
 import { transcribeFile } from "../lib/soniox";
 import { needsTranslation, translateToHindiEnglish } from "../lib/translate";
 import { generateDocx } from "../lib/docxGenerator";
-
-const prisma = new PrismaClient({ log: ["error"] });
 const CONCURRENCY = 5;
 const TEMP_DIR = process.env.TEMP_DIR || "./temp";
 const OUTPUT_DIR = process.env.OUTPUT_DIR || "./outputs";
